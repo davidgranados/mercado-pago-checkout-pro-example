@@ -2,14 +2,14 @@
 document.getElementById("checkout-btn").addEventListener("click", function() {
 
   $('#checkout-btn').attr("disabled", true);
-  
+
   var orderData = {
     quantity: document.getElementById("quantity").value,
     description: document.getElementById("product-description").innerHTML,
     price: document.getElementById("unit-price").innerHTML
   };
-    
-  fetch("/create_preference", {
+
+  fetch("http://localhost:8080/create_preference", {
           method: "POST",
           headers: {
               "Content-Type": "application/json",
@@ -34,15 +34,19 @@ document.getElementById("checkout-btn").addEventListener("click", function() {
 
 //Create preference when click on checkout button
 function createCheckoutButton(preference) {
-  var script = document.createElement("script");
-  
-  // The source domain must be completed according to the site for which you are integrating.
-  // For example: for Argentina ".com.ar" or for Brazil ".com.br".
-  script.src = "https://www.mercadopago.com.ar/integrations/v1/web-payment-checkout.js";
-  script.type = "text/javascript";
-  script.dataset.preferenceId = preference;
+  const mp = new MercadoPago('TEST-46d40c84-f9aa-4d12-9428-5641ffd49df5', {
+      locale: 'es-PE'
+  });
   document.getElementById("button-checkout").innerHTML = "";
-  document.querySelector("#button-checkout").appendChild(script);
+  mp.checkout({
+    preference: {
+        id: preference
+    },
+    render: {
+          container: '#button-checkout', // Indica el nombre de la clase donde se mostrará el botón de pago
+          label: 'Pagar', // Cambia el texto del botón de pago (opcional)
+    }
+});
 }
 
 //Handle price update
@@ -57,7 +61,7 @@ function updatePrice() {
   document.getElementById("summary-total").innerHTML = "$ " + amount;
 }
 document.getElementById("quantity").addEventListener("change", updatePrice);
-updatePrice();  
+updatePrice();
 
 //go back
 document.getElementById("go-back").addEventListener("click", function() {
@@ -65,5 +69,5 @@ document.getElementById("go-back").addEventListener("click", function() {
   setTimeout(() => {
       $(".shopping-cart").show(500).fadeIn();
   }, 500);
-  $('#checkout-btn').attr("disabled", false);  
+  $('#checkout-btn').attr("disabled", false);
 });
